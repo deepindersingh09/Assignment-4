@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
 import { supabase } from '../lib/supabase';
 
 interface Props {
@@ -16,11 +16,7 @@ export default function Signup({ onBackToLogin, onLoginSuccess }: Props) {
   const handleSignup = async () => {
     const { data, error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      Alert.alert('Sign Up Failed', error.message);
-      return;
-    }
-
+    if (error) return Alert.alert('Signup failed', error.message);
     const user = data.user;
     if (!user) return;
 
@@ -29,25 +25,83 @@ export default function Signup({ onBackToLogin, onLoginSuccess }: Props) {
         uuid: user.id,
         first_name: firstName,
         last_name: lastName,
-        email: user.email
-      }
+        email: user.email,
+      },
     ]);
 
-    if (insertError) {
-      Alert.alert('Insert Failed', insertError.message);
-    } else {
-      onLoginSuccess({ firstName, lastName, email });
-    }
+    if (insertError) return Alert.alert('Insert failed', insertError.message);
+
+    onLoginSuccess({ firstName, lastName, email });
   };
 
   return (
-    <View>
-      <TextInput placeholder="First Name" onChangeText={setFirstName} value={firstName} />
-      <TextInput placeholder="Last Name" onChangeText={setLastName} value={lastName} />
-      <TextInput placeholder="Email" onChangeText={setEmail} value={email} />
-      <TextInput placeholder="Password" onChangeText={setPassword} value={password} secureTextEntry />
+    <View style={styles.container}>
+      <Text style={styles.title}>Create Account</Text>
+
+      <TextInput
+        placeholder="First Name"
+        value={firstName}
+        onChangeText={setFirstName}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Last Name"
+        value={lastName}
+        onChangeText={setLastName}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        style={styles.input}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        style={styles.input}
+        secureTextEntry
+      />
+
       <Button title="Sign Up" onPress={handleSignup} />
-      <Text onPress={onBackToLogin}>Already have an account? Login</Text>
+
+      <Text style={styles.switchText} onPress={onBackToLogin}>
+        Already have an account? <Text style={styles.link}>Login</Text>
+      </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',     // center vertically
+    alignItems: 'center',         // center horizontally
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 30,
+    fontWeight: '600',
+  },
+  input: {
+    width: '100%',
+    borderBottomWidth: 1,
+    paddingVertical: 10,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  switchText: {
+    marginTop: 20,
+    fontSize: 14,
+    color: '#333',
+  },
+  link: {
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+});
