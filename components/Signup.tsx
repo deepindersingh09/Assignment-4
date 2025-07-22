@@ -20,6 +20,13 @@ export default function Signup({ onBackToLogin, onLoginSuccess }: Props) {
     const user = data.user;
     if (!user) return;
 
+    console.log("Insert payload:", {
+  uuid: user.id,
+  first_name: firstName,
+  last_name: lastName,
+  email: user.email
+});
+
     const { error: insertError } = await supabase.from('user_details').insert([
       {
         uuid: user.id,
